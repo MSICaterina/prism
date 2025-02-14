@@ -13,14 +13,12 @@ use utoipa::{
 
 use crate::{payload::CryptoPayload, CryptoAlgorithm};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(try_from = "CryptoPayload", into = "CryptoPayload")]
 pub enum Signature {
     Secp256k1(Secp256k1Signature),
     Ed25519(Ed25519Signature),
     Secp256r1(Secp256r1Signature),
-    #[default]
-    Placeholder,
 }
 
 impl Signature {
@@ -29,7 +27,6 @@ impl Signature {
             Signature::Ed25519(sig) => sig.to_bytes().to_vec(),
             Signature::Secp256k1(sig) => sig.serialize_compact().to_vec(),
             Signature::Secp256r1(sig) => sig.to_vec(),
-            Signature::Placeholder => vec![],
         }
     }
 
@@ -38,7 +35,6 @@ impl Signature {
             Signature::Ed25519(_) => bail!("Ed25519 sig from DER format is not implemented"),
             Signature::Secp256k1(sig) => sig.serialize_der().to_vec(),
             Signature::Secp256r1(sig) => sig.to_der().as_bytes().to_vec(),
-            Signature::Placeholder => vec![],
         };
         Ok(der)
     }
@@ -74,7 +70,6 @@ impl Signature {
             Signature::Ed25519(_) => CryptoAlgorithm::Ed25519,
             Signature::Secp256k1(_) => CryptoAlgorithm::Secp256k1,
             Signature::Secp256r1(_) => CryptoAlgorithm::Secp256r1,
-            Signature::Placeholder => CryptoAlgorithm::Ed25519,
         }
     }
 }
